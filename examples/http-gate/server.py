@@ -44,19 +44,58 @@ def no_mandate(request: dict[str, Any]) -> str:
     # A change marked ``delegated`` was passed on by ``by``, whose own record is
     # among ``delegators``: it holds only while ``by`` holds the contract too.
     records = {r["principal"]: r for r in [record, *record.get("delegators", [])]}
-    if holds_by_record(records, record["principal"], contract):
+    # How the site reads a delegation (ADR 0048); holdings when it does not say.
+    model = record.get("model", "holdings")
+    if holds_by_record(records, record["principal"], contract, model):
         return ""
+    if unbound_by_record(records, record["principal"], contract, model):
+        return "unbound"
     return "ended" if ever_by_record(records, record["principal"], contract) else "never_held"
 
 
-def holds_by_record(records: dict[str, Any], principal: str, contract: str, depth: int = 8) -> bool:
+def under_grant(records: dict[str, Any], change: dict[str, Any]) -> bool:
+    """Whether a delegation is under the grant its issuer holds now (``grant_bound``).
+
+    The grant is the issuer's change in force when the delegation was made. It
+    must still be the issuer's last change, and list everything the delegation lists.
+    """
+    given = records.get(change["by"], {}).get("changes", [])
+    earlier = [c for c in given if c["time_ms"] <= change["time_ms"]]
+    if not earlier or earlier[-1] is not given[-1]:
+        return False
+    return set(change["contracts"]) <= set(given[-1]["contracts"])
+
+
+def unbound_by_record(
+    records: dict[str, Any], principal: str, contract: str, model: str, depth: int = 8
+) -> bool:
+    """Whether the mandate fails only because a delegation is not under its grant."""
+    if model != "grant_bound" or principal not in records or depth == 0:
+        return False
+    last = records[principal]["changes"][-1]
+    if contract not in last["contracts"] or last["until_ms"] is not None:
+        return False
+    if not last.get("delegated"):
+        return False
+    if not under_grant(records, last):
+        return True
+    return unbound_by_record(records, last["by"], contract, model, depth - 1)
+
+
+def holds_by_record(
+    records: dict[str, Any], principal: str, contract: str, model: str = "holdings", depth: int = 8
+) -> bool:
     """Whether the last change of *principal* is in force, lists the contract, and may give it."""
     if principal not in records or depth == 0:
         return False
     last = records[principal]["changes"][-1]
     if contract not in last["contracts"] or last["until_ms"] is not None:
         return False
-    return not last.get("delegated") or holds_by_record(records, last["by"], contract, depth - 1)
+    if not last.get("delegated"):
+        return True
+    if model == "grant_bound" and not under_grant(records, last):
+        return False
+    return holds_by_record(records, last["by"], contract, model, depth - 1)
 
 
 def ever_by_record(records: dict[str, Any], principal: str, contract: str, depth: int = 8) -> bool:
@@ -128,8 +167,8 @@ def decide(request: dict[str, Any]) -> dict[str, Any]:
     if request.get("mandate") or request.get("mandate_statements"):
         # Optional: this gate's own finding, compared with the premise on the card.
         more["authority_holds"] = not kind
-    if kind in ("ended", "never_held"):
-        # Optional: which of the two kinds of no mandate the refusal is for.
+    if kind in ("ended", "never_held", "unbound"):
+        # Optional: which kind of no mandate the refusal is for.
         more["reason_details"] = {"authority": kind}
     if refusals:
         return {"verdict": "DENY", "reasons": refusals, "reason_codes": codes, **more}

@@ -20,7 +20,7 @@ body:
     id: agentic-datacenter
     attributes:
       label: Agentic-Datacenter version
-      description: The tag of the season's benchmark version (benchmark-v1.6 today) or the commit the card was made with.
+      description: The tag of the season's benchmark version (benchmark-v1.7 today) or the commit the card was made with.
     validations:
       required: true
   - type: textarea

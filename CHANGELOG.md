@@ -59,6 +59,10 @@ Tooling
 
 Entries are newest first. Where an older entry names a benchmark version, a deadline or a number of scenarios, the newest entry is the one that holds.
 
+Changed
+
+- Season 1 runs on `benchmark-v1.7` instead of `benchmark-v1.6`, with the two cases proposed by aeoess in issue 76 as four scenarios (ADR 0048). A scenario declares its site's authorization model, `holdings` or `grant_bound`; the register judges the run by it, and a gate is told it. `AD-21` and `AD-22` hold a control to a site that binds a delegation to its grant, and `OP-19` and `OP-20` to one that reads a delegation by what its issuer holds now. The library has 42 scenarios. Every earlier scenario, the contracts, the agents and the profile hash as before. The freeze of Season 1 is lifted this once; scenarios added after this come with the weekly runs and the next frozen version.
+
 Added
 
 - A site declares how it reads a delegation (ADR 0048), proposed by aeoess in issue 76. Beside `holdings`, the rule as it was, there is `grant_bound`: a delegation holds only under the grant its issuer held when it was passed on, so a mandate withdrawn and given again, or widened later, does not bring an old delegation back. It is in the rule, in vectors that give every case under both models (`docs/reference/mandate-vectors-grant-bound.json`, MIT) and in the reference verifier. Nothing that does not name a model changes, and no scenario declares one yet.

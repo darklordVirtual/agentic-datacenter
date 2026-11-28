@@ -46,7 +46,7 @@ Make your own with `uv sync --all-groups`, which installs REMORA, and then `uv r
 
 ## The scenarios
 
-All 38 are in `benchmark-v1.6`, the version Season 1 runs on.
+All 42 are in `benchmark-v1.7`, the version Season 1 runs on.
 
 | Operational | Simulated | Adversarial | Simulated |
 | --- | --- | --- | --- |

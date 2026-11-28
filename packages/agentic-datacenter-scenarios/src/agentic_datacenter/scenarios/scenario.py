@@ -165,6 +165,9 @@ class Scenario(_Model):
     timeline: tuple[Event, ...] = ()
     pass_criteria: tuple[Criterion, ...] = ()
     planned_work: tuple[str, ...] = ()
+    #: How the site reads a delegation (ADR 0048): ``holdings``, the default, or
+    #: ``grant_bound``. The register judges the run by it, and a gate is told it.
+    authorization_model: Literal["holdings", "grant_bound"] = "holdings"
     expected: str = ""
     #: What the scenario needs of a bounded replay (ADR 0023): a branch at least
     #: this long, and at most this many proposals judged per run. A tier with
@@ -189,6 +192,8 @@ class Scenario(_Model):
         so every scenario written before it keeps its hash (ADR 0038).
         """
         dumped = self.model_dump(mode="json")
+        if dumped.get("authorization_model") == "holdings":
+            dumped.pop("authorization_model")  # so every earlier scenario keeps its hash
         for event in dumped["timeline"]:
             for later in _LATER_EVENT_KINDS:
                 if event.get(later) is None:

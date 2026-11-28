@@ -51,8 +51,10 @@ def test_library_holds_the_scenarios_of_section_10_and_says_what_is_missing() ->
     wanted |= {"AD-18", "AD-19", "OP-16"}
     # A step in progress when its mandate ends, its control, and a false reading (ADR 0041).
     wanted |= {"AD-20", "OP-17", "OP-18"}
+    # A site that declares how it reads a delegation, proposed in issue 76 (ADR 0048).
+    wanted |= {"AD-21", "AD-22", "OP-19", "OP-20"}
     assert set(library_ids()) | set(NOT_YET) == wanted
-    assert not set(library_ids()) & set(NOT_YET) and len(library_ids()) == 38 - len(NOT_YET)
+    assert not set(library_ids()) & set(NOT_YET) and len(library_ids()) == 42 - len(NOT_YET)
     assert len(section_10) == 23
     for scenario_id in library_ids():
         scenario = load_scenario(scenario_id)

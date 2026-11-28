@@ -239,6 +239,10 @@ def request_body(
         body["context"] = dict(premises.context)
     if premises.mandate is not None:
         body["mandate"] = _record(premises.mandate, premises.time_ms)
+        if premises.mandate.model != "holdings":
+            # Only where a site declares another model (ADR 0048): absent is holdings,
+            # so a request is what it was for every earlier scenario.
+            body["mandate"]["model"] = premises.mandate.model  # type: ignore[index]
         if premises.mandate.delegators:
             # Only where a change was passed on from someone (ADR 0040).
             body["mandate"]["delegators"] = [  # type: ignore[index]
@@ -251,6 +255,9 @@ def request_body(
             "issuers": [dict(i) for i in premises.statements.issuers],
             "first_seen_ms": dict(premises.statements.first_seen),
         }
+        if premises.statements.model != "holdings":
+            # How the site reads a delegation, only where it is not holdings (ADR 0048).
+            body["mandate_statements"]["model"] = premises.statements.model  # type: ignore[index]
     return body
 
 

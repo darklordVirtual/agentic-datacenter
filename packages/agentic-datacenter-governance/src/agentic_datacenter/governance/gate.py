@@ -120,6 +120,8 @@ class Mandate:
     #: The record of everyone a change of this one was passed on from, and of
     #: those they had it from; empty when no change is a delegation (ADR 0040).
     delegators: tuple[Mandate, ...] = ()
+    #: How the site reads a delegation: ``holdings`` or ``grant_bound`` (ADR 0048).
+    model: str = "holdings"
 
 
 @dataclass(frozen=True)
@@ -150,6 +152,8 @@ class MandateStatements:
     #: path's clock. Kept by the site and not by the issuer, so a statement
     #: cannot be dated back past it (ADR 0040).
     first_seen: Mapping[str, int] = field(default_factory=dict)
+    #: How the site reads a delegation: ``holdings`` or ``grant_bound`` (ADR 0048).
+    model: str = "holdings"
 
 
 @dataclass(frozen=True)
@@ -234,7 +238,7 @@ class Decision:
 #:
 #: - ``never_held``: the proposer never held a mandate for this contract.
 #: - ``ended``: it held one, and that has ended or been narrowed.
-AUTHORITY_DETAILS = ("never_held", "ended")
+AUTHORITY_DETAILS = ("never_held", "ended", "unbound")
 
 
 #: Why a gate did not allow a proposal, in a word. A gate may give one or more

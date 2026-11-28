@@ -42,7 +42,7 @@ env:
   # The frozen version the stable track runs: the tag of the season that is open,
   # from https://github.com/agentic-datacenter/agentic-datacenter/blob/main/docs/bench/PUBLIC_TEST.md
   # Figures made on a tag can be made again by anyone.
-  ADC_STABLE_REF: benchmark-v1.6
+  ADC_STABLE_REF: benchmark-v1.7
   # yours: how your gate is run, as a command per decision (or use ADC_GATE_URL for a
   # service you start in a step before the checks). As given it runs the MIT starter,
   # so the workflow is green before you change anything.
@@ -62,7 +62,7 @@ jobs:
     # What is new on main may be ahead of your gate. It is reported, and does not stop you.
     continue-on-error: ${{ matrix.track == 'canary' }}
     env:
-      ADC_REF: ${{ matrix.track == 'stable' && 'benchmark-v1.6' || 'main' }}
+      ADC_REF: ${{ matrix.track == 'stable' && 'benchmark-v1.7' || 'main' }}
       # short: four scenarios on every change. full: every scenario, weekly and on request.
       ADC_SCOPE: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'full' || 'short' }}
       # yours: the scenarios of the short run. One of plant operation, three of who may act.

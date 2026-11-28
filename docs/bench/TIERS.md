@@ -7,11 +7,11 @@ Pick a test by the time you have. Each step up plays more of the same scenarios;
 | **1 minute** | `demo --scenario OP-03 --gate static_allowlist` | one scenario, with no control and with one | a page that shows what an agent does to a plant | 54 s |
 | **2 minutes** | `bench run --tier quick --scenario OP-03 --gate <yours> --gate static_allowlist` | one scenario, your system beside a reference control | your first figures, a report and a card | 1 min 45 s in one process |
 | **5 to 7 minutes** | the same with `--jobs 4` and the scenarios that matter to you, for example the seven on who may act | a chosen set, shortened | what your system does where it should differ from others | 6 min 30 s for seven scenarios and two gates |
-| **About half an hour** | `bench run --tier quick --jobs 6 --gate <yours> --gate static_allowlist --gate null_gate` | all 38 scenarios, each shortened to what shows its last event | the whole picture, as a development result | 26 min for three gates, one of them a full service |
-| **A few hours** | `bench run --tier standard --jobs <cores>` | all 38 at full length, three seeds | a result of your own that others can make again | 2 h 11 min for three gates with 9 jobs, on a machine with 16 threads |
-| **Overnight, or split over machines** | `bench run --tier season`, in parts with `--seeds` and `bench merge` | all 38 at full length, thirty seeds | what a season reports | not yet measured on this version; 6 h 40 min on an earlier one |
+| **About half an hour** | `bench run --tier quick --jobs 6 --gate <yours> --gate static_allowlist --gate null_gate` | all 42 scenarios, each shortened to what shows its last event | the whole picture, as a development result | 26 min for three gates, one of them a full service |
+| **A few hours** | `bench run --tier standard --jobs <cores>` | all 42 at full length, three seeds | a result of your own that others can make again | 2 h 11 min for three gates with 9 jobs on `benchmark-v1.6`, which had 38 scenarios, on a machine with 16 threads |
+| **Overnight, or split over machines** | `bench run --tier season`, in parts with `--seeds` and `bench merge` | all 42 at full length, thirty seeds | what a season reports | not yet measured on this version; 6 h 40 min on an earlier one |
 
-The first four were measured on 2026-11-27 on a laptop with eight cores and 8 GB of memory (Apple M1), on the version of Season 1. `standard` was measured the same day on that version, on a machine with 16 threads: `remora_governed`, `static_allowlist` and `null_gate` together, 228 runs of each, in 2 hours 11 minutes; memory was not recorded. `season` was measured on `benchmark-v1`, which had 23 scenarios, on that machine; expect it to take about 38/23 as long now.
+The first four were measured on 2026-11-27 on a laptop with eight cores and 8 GB of memory (Apple M1), on `benchmark-v1.6`, which had 38 scenarios; the whole quick benchmark plays a fifth more simulated time now. `standard` was measured the same day on `benchmark-v1.6`, which had 38 of the 42 scenarios, on a machine with 16 threads: `remora_governed`, `static_allowlist` and `null_gate` together, 228 runs of each, in 2 hours 11 minutes; memory was not recorded. `season` was measured on `benchmark-v1`, which had 23 scenarios, on that machine; expect it to take about 38/23 as long now.
 
 ## What machine
 
@@ -45,7 +45,7 @@ A scenario cut at 30 minutes shows nothing of what comes later. So `quick` makes
 
 The card carries the 30 minutes as `duration_override_s`, the two hours as `duration_reach_s`, and each run its own length as `duration_s`.
 
-Seventeen of the 38 scenarios are longer than 30 minutes in a quick run for that:
+Twenty-one of the 42 scenarios are longer than 30 minutes in a quick run for that:
 
 | Scenario | Why | Length in a quick run |
 | --- | --- | --- |
@@ -55,6 +55,10 @@ Seventeen of the 38 scenarios are longer than 30 minutes in a quick run for that
 | `OP-17` | the mandate is withdrawn at 30 minutes, after the step has settled (ADR 0041) | 1 hour, the whole scenario |
 | `AD-18` | the giver's mandate is withdrawn at 50 minutes, and the work order comes at 1 hour (ADR 0040) | 1 hour 30 minutes |
 | `AD-12` | the second, narrower mandate at 1 hour | 1 hour 30 minutes |
+| `AD-21` | the giver's mandate is given again at 50 minutes, and the step passed on anew comes at 1 hour 15 minutes (ADR 0048) | 1 hour 45 minutes |
+| `OP-19` | the giver's mandate is given again at 50 minutes, and the work order comes at 1 hour (ADR 0048) | 1 hour 30 minutes, the whole scenario |
+| `OP-20` | the widening at 30 minutes, and the rotation at 40 minutes (ADR 0048) | 1 hour 10 minutes |
+| `AD-22` | the rotation that is passed on anew comes at 1 hour 42 minutes, an hour after the last, which is as often as a rotation may be made (ADR 0048) | 2 hours, the whole scenario |
 | `OP-12` | an event at 30 minutes | 45 minutes, the whole scenario |
 | `AD-14`, `OP-09` | decision points 10 minutes apart; the work that needs a person is proposed at 40 minutes | 1 hour, the whole scenario |
 | `OP-10` | decision points 15 minutes apart | 1 hour 30 minutes |
@@ -65,7 +69,7 @@ Before this, the main branch cut the twelve it then had of these at 30 minutes. 
 
 A quick run still plays only the first steps of an agent's script. A step the hostile agent takes late in a scenario, such as the one executed on a premise that does not hold in `OP-02`, `OP-04`, `OP-05`, `OP-08` and `OP-13`, is in a run at full length and not in a quick one. `--seconds` shortens every scenario to exactly what it says, also beside `--tier quick`.
 
-One run of each of the 38 scenarios is 31 hours 45 minutes of simulated time in a quick run, against 18 hours 40 minutes if each were cut at 30 minutes: seven tenths more. The table at the top of this page has the times measured since.
+One run of each of the 42 scenarios is 37 hours 55 minutes of simulated time in a quick run, against 20 hours 40 minutes if each were cut at 30 minutes: more than four fifths more. The table at the top of this page has the times measured since.
 
 ## What it costs
 

@@ -363,7 +363,9 @@ def test_the_published_schema_describes_the_statements_a_request_carries() -> No
     spec = request["properties"]["mandate_statements"]
     assert "mandate_statements" not in request["required"]
     signed = body["mandate_statements"]
-    assert set(signed) == set(spec["required"]) == set(spec["properties"])
+    # The model is there only where a site declares one that is not holdings (ADR 0048).
+    assert set(signed) == set(spec["required"]) == set(spec["properties"]) - {"model"}
+    assert spec["properties"]["model"]["enum"] == list(mandates.MODELS)
     statement = spec["properties"]["statements"]["items"]
     assert (
         set(signed["statements"][0]) == set(statement["required"]) == set(statement["properties"])

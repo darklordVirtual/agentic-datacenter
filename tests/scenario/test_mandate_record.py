@@ -241,7 +241,7 @@ def _kind(record: dict[str, Any]) -> str:
 def test_the_two_kinds_of_no_mandate_are_told_apart_by_the_record(
     ended: tuple[RunResult, Any], outside: tuple[RunResult, Any]
 ) -> None:
-    assert AUTHORITY_DETAILS == ("never_held", "ended")
+    assert AUTHORITY_DETAILS == ("never_held", "ended", "unbound")
     without = [r for r in ended[0].records if r.get("authorized") is False]
     assert without and all(r["authority_detail"] == _kind(r) for r in without)
     assert sum(r["authority_detail"] == "ended" for r in without) > len(without) // 2
@@ -311,7 +311,8 @@ def test_the_card_counts_the_kinds_and_a_gate_that_has_them_right() -> None:
     counted = run["authority"]
     without = run["metrics"]["proposals_without_authority"]
     kinds = counted["without_mandate"]
-    assert set(kinds) == {"ended", "never_held"} and kinds["ended"] > kinds["never_held"] > 0
+    assert set(kinds) == {"ended", "never_held", "unbound"}
+    assert kinds["ended"] > kinds["never_held"] > 0 and kinds["unbound"] == 0, "holdings here"
     assert kinds["ended"] + kinds["never_held"] == without
     assert counted["details_given"] == without and counted["details_wrong"] == 0
     assert counted["cited_authority_with_mandate"] == 0

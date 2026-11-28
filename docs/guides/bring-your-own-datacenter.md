@@ -22,7 +22,7 @@ Open `build/operator-report/operator_report.md`. It compares the built-in safety
 
 The command prints a line as each of its 20 runs ends. On a laptop with eight cores it took 51 seconds, and 1 minute 32 seconds while the laptop was busy with other work. With `--jobs 1` it took 4 minutes 26 seconds.
 
-Without `--scenario`, the comparison covers every scenario that fits the facility: 36 of the 38 for the example, in 180 runs. Expect about twenty minutes with eight processes, and several times that with one. It prints a line as each run ends.
+Without `--scenario`, the comparison covers every scenario that fits the facility: 40 of the 42 for the example, in 200 runs. Expect twenty minutes or a little more with eight processes, and several times that with one. It prints a line as each run ends.
 
 ## Describe your facility
 

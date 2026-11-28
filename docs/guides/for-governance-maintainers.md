@@ -54,7 +54,7 @@ A run against your system published by this project says which relation it has t
 
 ## What comes next, and how to shape it
 
-- **In `benchmark-v1.6` already:** signed mandates with expiry, withdrawal, delegation, an issuer's standing, key rotation and forged statements; a step in progress when its mandate ends; readings signed by their source; and a check of your receipts' signatures ([Signed mandate statements](../reference/mandate-statements.md), ADR 0039 to 0041).
+- **In `benchmark-v1.7` already:** a site that declares how it reads a delegation (proposed by an outside tester); signed mandates with expiry, withdrawal, delegation, an issuer's standing, key rotation and forged statements; a step in progress when its mandate ends; readings signed by their source; and a check of your receipts' signatures ([Signed mandate statements](../reference/mandate-statements.md), ADR 0039 to 0041).
 - **Conditional permissions**: a permission that caps a step, judged on the step as carried out (ADR 0037).
 - **More scenarios, data and participants**, which every run of the workflow picks up.
 

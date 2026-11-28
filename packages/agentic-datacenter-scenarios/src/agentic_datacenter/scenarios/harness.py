@@ -621,6 +621,8 @@ class ScenarioRun:
         self.gate = make_gate(contracts)
         self.agent = make_agent() if make_agent is not None else None
         self.world = build_world(profile, self.gate, operating_profile, seed, contracts)
+        if scenario.authorization_model != "holdings":
+            self.world.path.set_authorization_model(scenario.authorization_model)
         self.length = min(duration_s or scenario.duration_s, scenario.duration_s)
         self._operator = (operator_delay_s, operator_policy)
         events = sorted(scenario.timeline, key=lambda e: e.at_s)

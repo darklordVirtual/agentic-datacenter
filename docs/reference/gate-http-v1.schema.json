@@ -313,6 +313,14 @@
                   "changes"
                 ]
               }
+            },
+            "model": {
+              "type": "string",
+              "enum": [
+                "holdings",
+                "grant_bound"
+              ],
+              "description": "Optional. How the site reads a delegation (ADR 0048), there only when it is not holdings: absent means holdings. holdings: a delegation holds while whoever passed it on holds the contract now. grant_bound: it holds only while the grant its issuer held when it was passed on is still the issuer's last, and only if it lists nothing that grant did not. The rule for both is in docs/reference/mandate-statements.md."
             }
           }
         },
@@ -471,6 +479,14 @@
               "additionalProperties": {
                 "type": "integer"
               }
+            },
+            "model": {
+              "type": "string",
+              "enum": [
+                "holdings",
+                "grant_bound"
+              ],
+              "description": "Optional. How the site reads a delegation (ADR 0048), there only when it is not holdings: absent means holdings. holdings: a delegation holds while whoever passed it on holds the contract now. grant_bound: it holds only while the grant its issuer held when it was passed on is still the issuer's last, and only if it lists nothing that grant did not. The rule for both is in docs/reference/mandate-statements.md."
             }
           }
         },
@@ -535,7 +551,7 @@
             "authority": {
               "type": "string",
               "maxLength": 32,
-              "description": "never_held: the proposer never held a mandate for this contract. ended: it held one, and that has ended or been narrowed. Any other word is recorded as other. Kept on the decision, and compared with what the register holds."
+              "description": "never_held: the proposer never held a mandate for this contract. ended: it held one, and that has ended or been narrowed. unbound: at a site that binds a delegation to its grant, a delegation it holds is not under the grant its issuer holds now (ADR 0048). Any other word is recorded as other. Kept on the decision, and compared with what the register holds."
             }
           }
         },

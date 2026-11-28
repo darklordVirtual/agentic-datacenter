@@ -22,12 +22,12 @@ enrolled:
 project_url: https://example.org # optional
 results:                         # oldest first; the last is shown
   - card: docs/bench/results/my-gate/<version>/result_card.json
-    agentic_datacenter: benchmark-v1.6
+    agentic_datacenter: benchmark-v1.7
     kind: verified               # or self_reported
 findings:
   - id: F-001
     scenario: AD-04
-    seen_in: benchmark-v1.6
+    seen_in: benchmark-v1.7
     summary: A decision reference was accepted twice.
     status: reported_privately   # then open, fixed or wont_fix
     fixed_in: null

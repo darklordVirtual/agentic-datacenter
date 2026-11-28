@@ -92,7 +92,8 @@ def test_no_event_within_reach_is_cut_off_and_the_reach_is_the_limit() -> None:
             longer.append(scenario_id)
     assert longer == [
         "AD-01", "AD-05", "AD-09", "AD-11", "AD-12", "AD-14", "AD-16", "AD-17", "AD-18", "AD-19",
-        "OP-01", "OP-03", "OP-07", "OP-09", "OP-10", "OP-12", "OP-17",
+        "AD-21", "AD-22", "OP-01", "OP-03", "OP-07", "OP-09", "OP-10", "OP-12", "OP-17", "OP-19",
+        "OP-20",
     ]  # fmt: skip
 
 

@@ -329,7 +329,8 @@ def test_the_mandate_record_is_in_a_request_only_when_one_was_set() -> None:
     spec = request["properties"]["mandate"]
     assert set(body["mandate"]) == set(spec["required"])  # type: ignore[arg-type]
     # A mandate that was passed on also carries the record of who passed it on (ADR 0040).
-    assert set(spec["properties"]) - set(spec["required"]) == {"delegators"}
+    # Optional: delegators, and the model where a site declares one that is not holdings.
+    assert set(spec["properties"]) - set(spec["required"]) == {"delegators", "model"}
     change = spec["properties"]["changes"]["items"]
     assert set(body["mandate"]["changes"][0]) == set(change["required"])  # type: ignore[index,call-overload]
     # A change that ends by itself also carries when (ADR 0039).

@@ -36,7 +36,7 @@ def test_season_1_is_the_season_that_was_published(tool: ModuleType) -> None:
     first = tool.season(1)
     assert first["deadline"] == "2027-01-13T12:00:00Z"
     assert first["round"] == 35679412
-    assert first["version"] == "benchmark-v1.6"
+    assert first["version"] == "benchmark-v1.7"
     assert first["opens"] == "2026-11-20"
 
 
@@ -79,10 +79,10 @@ def test_a_season_is_always_open(tool: ModuleType) -> None:
 
 def test_a_season_uses_the_benchmark_version_frozen_when_it_opens(tool: ModuleType) -> None:
     plan = dict(tool.load())
-    assert tool.season(9, plan)["version"] == "benchmark-v1.6"
+    assert tool.season(9, plan)["version"] == "benchmark-v1.7"
     plan["versions"] = [*plan["versions"], {"from_season": 5, "tag": "benchmark-v2"}]
     assert [tool.season(n, plan)["version"] for n in (4, 5, 9)] == [
-        "benchmark-v1.6", "benchmark-v2", "benchmark-v2",
+        "benchmark-v1.7", "benchmark-v2", "benchmark-v2",
     ]  # fmt: skip
 
 
@@ -101,7 +101,7 @@ def test_the_command_says_which_season_is_open(
     assert tool.main(["current", "--at", "2027-01-20T08:00:00Z"]) == 0
     said = capsys.readouterr().out
     assert "Season 2" in said and "2027-02-10T12:00:00Z" in said
-    assert str(tool.season(2)["round"]) in said and "benchmark-v1.6" in said
+    assert str(tool.season(2)["round"]) in said and "benchmark-v1.7" in said
     assert tool.main(["calendar", "--check"]) == 0
 
 
@@ -153,4 +153,4 @@ def test_the_plan_is_a_small_file_anyone_can_read() -> None:
     plan = json.loads((REPO / "docs/bench/seasons.json").read_text(encoding="utf-8"))
     assert plan["length_days"] == 28
     assert plan["first_deadline"] == "2027-01-13T12:00:00Z"
-    assert plan["versions"][0] == {"from_season": 1, "tag": "benchmark-v1.6"}
+    assert plan["versions"][0] == {"from_season": 1, "tag": "benchmark-v1.7"}

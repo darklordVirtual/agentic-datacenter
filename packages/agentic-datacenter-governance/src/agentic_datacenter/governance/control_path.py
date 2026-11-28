@@ -40,6 +40,7 @@ from agentic_datacenter.governance.gate import (
     Verdict,
 )
 from agentic_datacenter.governance.interop import EPOCH, GATE_DETAIL_KEPT, plant_context
+from agentic_datacenter.governance.mandates import HOLDINGS
 from agentic_datacenter.governance.premises import (
     AppliedWrite,
     PremiseReader,
@@ -169,6 +170,8 @@ class GovernedPath:
         self._presented_at: dict[str, int] = {}
         #: What happened to an issuer's key: ``("rotated", ms)`` or ``("ended", ms)``.
         self._issuer_events: dict[str, list[tuple[str, int]]] = {}
+        #: How this site reads a delegation (ADR 0048). Set before the run starts.
+        self.authorization_model = mandates.HOLDINGS
         #: Readings someone on the network has put a false value in place of, by tag.
         self._spoofed: dict[str, JsonValue] = {}
         self._records: list[dict[str, JsonValue]] = []
@@ -293,6 +296,45 @@ class GovernedPath:
         events.append((kind, now))
         self._kernel.state.touch("governance.path")
 
+    def set_authorization_model(self, model: str) -> None:
+        """Declare how this site reads a delegation: ``holdings`` or ``grant_bound`` (ADR 0048).
+
+        Raises:
+            ValueError: If *model* is not one of ``mandates.MODELS``.
+        """
+        if model not in mandates.MODELS:
+            raise ValueError(f"an authorization model is one of {', '.join(mandates.MODELS)}")
+        self.authorization_model = model
+        self._kernel.state.touch("governance.path")
+
+    def _under_grant(self, change: MandateChange) -> bool:
+        """Whether a delegation is under the grant its issuer holds now (``grant_bound``).
+
+        The grant is the issuer's change in force when the delegation was made.
+        It must still be the issuer's last change, and list everything the
+        delegation lists.
+        """
+        assert self._authority is not None
+        given = self._authority.get(change.by, [])
+        earlier = [c for c in given if c.time_ms <= change.time_ms]
+        if not earlier or earlier[-1] is not given[-1]:
+            return False
+        return set(change.contracts) <= set(given[-1].contracts)
+
+    def _unbound(self, principal: str, contract_id: str, depth: int) -> bool:
+        """Whether a mandate fails only because a delegation is not under its grant."""
+        assert self._authority is not None
+        changes = self._authority.get(principal)
+        if self.authorization_model != mandates.GRANT_BOUND or not changes or depth == 0:
+            return False
+        last = changes[-1]
+        expired = last.expires_at_ms is not None and self._kernel.clock.now_ms >= last.expires_at_ms
+        if contract_id not in last.contracts or expired or not last.delegated:
+            return False
+        if not self._under_grant(last):
+            return True
+        return self._unbound(last.by, contract_id, depth - 1)
+
     def authorized(self, principal: str, contract_id: str) -> bool | None:
         """Whether *principal* holds a mandate for *contract_id*; None if none was set for it."""
         if self._authority is None or principal not in self._authority:
@@ -308,8 +350,12 @@ class GovernedPath:
         expired = last.expires_at_ms is not None and self._kernel.clock.now_ms >= last.expires_at_ms
         if contract_id not in last.contracts or expired:
             return False
+        if not last.delegated:
+            return True
+        if self.authorization_model == mandates.GRANT_BOUND and not self._under_grant(last):
+            return False
         # Nobody passes on more than they hold, or for longer than they hold it.
-        return not last.delegated or self._holds(last.by, contract_id, depth - 1)
+        return self._holds(last.by, contract_id, depth - 1)
 
     def _ever_held(self, principal: str, contract_id: str, depth: int) -> bool:
         assert self._authority is not None
@@ -337,10 +383,14 @@ class GovernedPath:
         """Return the record of *principal*'s mandate; None if none was ever set for it."""
         if self._authority is None or principal not in self._authority:
             return None
+        model = self.authorization_model
         return Mandate(
             principal,
             tuple(self._authority[principal]),
-            tuple(Mandate(p, tuple(self._authority[p])) for p in self._lineage(principal)),
+            tuple(
+                Mandate(p, tuple(self._authority[p]), (), model) for p in self._lineage(principal)
+            ),
+            model,
         )
 
     def issuers(self) -> tuple[dict[str, JsonValue], ...]:
@@ -392,7 +442,9 @@ class GovernedPath:
             first_seen.setdefault(str(shown["id"]), self._presented_at.get(str(shown["id"]), 0))
         # Stable: statements of one instant stay in the order they were made.
         both.sort(key=lambda s: int(str(s["issued_at_ms"])))
-        return MandateStatements(principal, tuple(both), self.issuers(), first_seen)
+        return MandateStatements(
+            principal, tuple(both), self.issuers(), first_seen, self.authorization_model
+        )
 
     def spoof_reading(self, tag: str, value: JsonValue) -> None:
         """Put *value* in place of the reading of *tag* in what a gate is sent as context.
@@ -428,6 +480,8 @@ class GovernedPath:
         The time before the first change is not a mandate: nothing was said
         about authority then.
         """
+        if self._unbound(principal, contract_id, mandates.MAX_DEPTH):
+            return "unbound"
         held = self._ever_held(principal, contract_id, mandates.MAX_DEPTH)
         return "ended" if held else "never_held"
 
@@ -1052,6 +1106,10 @@ class GovernedPath:
         if self._spoofed:
             assert isinstance(state, dict)
             state["spoofed"] = dict(sorted(self._spoofed.items()))
+        if self.authorization_model != mandates.HOLDINGS:
+            # Only where a site declares another model, so every earlier run keeps its hash.
+            assert isinstance(state, dict)
+            state["authorization_model"] = self.authorization_model
         if self._issuer_events:
             assert isinstance(state, dict)
             state["issuer_events"] = {
@@ -1158,6 +1216,7 @@ class GovernedPath:
         )
         spoofed = state.get("spoofed")
         self._spoofed = dict(spoofed) if isinstance(spoofed, Mapping) else {}
+        self.authorization_model = str(state.get("authorization_model", HOLDINGS))
         self._issuer_events = {}
         kept_events = state.get("issuer_events")
         if isinstance(kept_events, Mapping):
